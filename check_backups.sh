@@ -22,7 +22,7 @@ echo -e "\nsetting up env"
 
 if [ -z "$1" ]
 then
-	echo "please specify READ, WRITE, LIST, DELETE, RESTORE"
+	echo "please specify READ, WRITE, LIST, DELETE, RESTORE, BACKUP"
 	exit 1
 elif [ "$1" = "READ" ]
 then
