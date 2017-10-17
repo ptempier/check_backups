@@ -41,8 +41,9 @@ then
 elif    [ "$1" = "BACKUP" ]
 then
         echo "backuping $PREFIX"
-        urbackupclientctl  start -i
-        exit 0 
+	urbackupclientctl  start -i
+        exit 0
+
 elif    [ "$1" = "RESTORE" ]
 then
 	echo "restoring $PREFIX"
@@ -159,7 +160,7 @@ fi
 
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
-echo -e "\ntest $TESTNUM file,  random user"
+echo -e "\ntest $TESTNUM file,  10th  user, 11th group"
 TESTFILE="$PREFIX/test$TESTNUM"
 
 #       NUMUSER="(wc -l /etc/passwd)"
@@ -177,24 +178,22 @@ else
         USRB="$(ls -ld "$TESTFILE" | awk '{print $3}')"
         if [ "$USR" != "$USRB" ]
         then
-                echo "KO user id is different $USR != $USRB"
+                echo "KO user id is different exptected $USR got  $USRB"
         else 
                 echo "OK same user id $USR"
         fi
 
         GRPB="$(ls -ld "$TESTFILE" | awk '{print $4}')"
-                if [ "$GRP" != "$GRPB" ]
+        if [ "$GRP" != "$GRPB" ]
         then
-                echo "KO group id is different $GRP != $GRPB"
+                echo "KO group id is different expected $GRP got $GRPB"
         else
                 echo "OK same grp id : $GRP"
         fi
 fi
 
-
 #=======================================
-
-TNUM="$(( $TESTNUM + 1))"
+TESTNUM="$(( $TESTNUM + 1))"
 echo -e "\ntest $TESTNUM file,  last passwd user id"
 TESTFILE="$PREFIX/test$TESTNUM"
 
