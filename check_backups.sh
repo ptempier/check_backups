@@ -22,7 +22,7 @@ echo -e "\nsetting up env"
 
 if [ -z "$1" ]
 then
-	echo "please specify READ or WRITE"
+	echo "please specify READ, WRITE, LIST, DELETE, RESTORE"
 	exit 1
 elif [ "$1" = "READ" ]
 then
@@ -38,6 +38,12 @@ then
         echo "deleting $PREFIX"
         rm -rf "$PREFIX"
         exit 0
+
+elif    [ "$1" = "RESTORE" ]
+then
+	echo "restoring $PREFIX"
+	urbackupclientctl restore-start -b last -d filetests
+	exit 0
 else
 	echo "unsupported, exiting"
 	exit 1
@@ -133,7 +139,7 @@ else
         then
                 echo "KO user id is different $USR != $REFID"
         else
-                echo "OK same grp id : $USR"
+                echo "OK same user id : $USR"
         fi
 
         GRP="$(ls -ld "$TESTFILE" | awk '{print $4}')"
@@ -169,7 +175,7 @@ else
         then
                 echo "KO user id is different $USR != $USRB"
         else 
-                echo "OK same grp id $USR"
+                echo "OK same user id $USR"
         fi
 
         GRPB="$(ls -ld "$TESTFILE" | awk '{print $4}')"
@@ -180,14 +186,50 @@ else
                 echo "OK same grp id : $GRP"
         fi
 fi
+
+
 #=======================================
-TESTNUM="$(( $TESTNUM + 1))"
-echo -e "\ntest $TESTNUM folder, random user"
+
+TNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM file,  last passwd user id"
 TESTFILE="$PREFIX/test$TESTNUM"
 
 #       NUMUSER="(wc -l /etc/passwd)"
 #       RAND="$(( ( RANDOM % $NUMUSER )  + 1 ))"
 #       USR="$(sed "${$RAND}q;d" /etc/passwd | awk '{print $1}')"
+USR="$(tail -n1  /etc/passwd | cut -d ':' -f 1)"
+GRP="$(tail -n1  /etc/group  | cut -d ':' -f 1 )"
+
+if testit
+then
+        >"$TESTFILE"
+        chown "$USR:$GRP" "$TESTFILE"
+                echo "created $TESTFILE"
+else
+        USRB="$(ls -ld "$TESTFILE" | awk '{print $3}')"
+        if [ "$USR" != "$USRB" ]
+        then
+                echo "KO user id is different $USR != $USRB"
+        else
+                echo "OK same user id $USR"
+        fi
+
+        GRPB="$(ls -ld "$TESTFILE" | awk '{print $4}')"
+                if [ "$GRP" != "$GRPB" ]
+        then
+                echo "KO group id is different $GRP != $GRPB"
+        else
+                echo "OK same grp id : $GRP"
+        fi
+fi
+
+
+
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM folder, random user"
+TESTFILE="$PREFIX/test$TESTNUM"
+
 USR="$(sed "10q;d" /etc/passwd | cut -d ':' -f 1)"
 GRP="$(sed "11q;d" /etc/group  | cut -d ':' -f 1 )"
 
@@ -202,7 +244,7 @@ else
         then
                 echo "KO user id is different $USR != $USRB"
         else
-                echo "OK same grp id $USR"
+                echo "OK same user id $USR"
         fi
 
         GRPB="$(ls -ld "$TESTFILE" | awk '{print $4}')"
@@ -213,6 +255,37 @@ else
                 echo "OK same grp id : $GRP"
         fi
 fi
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM folder, last passwd user id"
+TESTFILE="$PREFIX/test$TESTNUM"
+
+USR="$(tail -n1 /etc/passwd | cut -d ':' -f 1)"
+GRP="$(tail -n1 /etc/group  | cut -d ':' -f 1 )"
+
+if testit
+then
+        mkdir "$TESTFILE"
+        chown "$USR:$GRP" "$TESTFILE"
+                echo "created $TESTFILE"
+else
+        USRB="$(ls -ld "$TESTFILE" | awk '{print $3}')"
+        if [ "$USR" != "$USRB" ]
+        then
+                echo "KO user id is different $USR != $USRB"
+        else
+                echo "OK same user id $USR"
+        fi
+
+        GRPB="$(ls -ld "$TESTFILE" | awk '{print $4}')"
+                if [ "$GRP" != "$GRPB" ]
+        then
+                echo "KO group id is different $GRP != $GRPB"
+        else
+                echo "OK same grp id : $GRP"
+        fi
+fi
+
 
 
 
