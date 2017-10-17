@@ -38,7 +38,11 @@ then
         echo "deleting $PREFIX"
         rm -rf "$PREFIX"
         exit 0
-
+elif    [ "$1" = "BACKUP" ]
+then
+        echo "backuping $PREFIX"
+        urbackupclientctl  start -i
+        exit 0 
 elif    [ "$1" = "RESTORE" ]
 then
 	echo "restoring $PREFIX"
