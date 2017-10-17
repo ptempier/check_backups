@@ -389,6 +389,46 @@ fi
 
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM file mtime in the futur"
+TESTFILE="$PREFIX/test$TESTNUM"
+TDATE="22970313"
+TDATEB="10325314800"
+if testit
+then
+        >"$TESTFILE"
+        touch -d "$TDATE" "$TESTFILE"
+else
+        FDATE="$(stat -c %Y "$TESTFILE")"
+        if [[ "$FDATE" = "$TDATEB" ]]
+        then
+                echo "OK mtime is good : $FDATE"
+        else
+                echo "KO mtime is bad $FDATE != $TDATEB"
+        fi
+fi
+
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM file mtime is negative"
+TESTFILE="$PREFIX/test$TESTNUM"
+TDATE="12970313"
+TDATEB="-21231590961"
+if testit
+then
+        >"$TESTFILE"
+        touch -d "$TDATE" "$TESTFILE"
+else
+        FDATE="$(stat -c %Y "$TESTFILE")"
+        if [[ "$FDATE" = "$TDATEB" ]]
+        then
+                echo "OK mtime is good : $FDATE"
+        else
+                echo "KO mtime is bad $FDATE != $TDATEB"
+        fi
+fi
+
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
 echo -e "\ntest $TESTNUM folder mtime"
 TESTFILE="$PREFIX/test$TESTNUM"
 TDATE="20120101"
@@ -853,3 +893,102 @@ else
                 echo "KO different md5 $DEST != $ORIG"
         fi
 fi
+
+#==========================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM 254 char filename"
+TESTFILE="$PREFIX/test${TESTNUM}"
+
+I=0
+L=254
+LNAME=""
+while [ $I -lt $L ]
+do
+	I=$(( $I + 1 ))
+	LNAME="${LNAME}a"
+done
+
+
+
+if testit
+then
+        mkdir "$TESTFILE"
+	> "$TESTFILE/$LNAME"
+else
+
+        if [ -f "$TESTFILE/$LNAME" ]
+        then
+                echo "OK long filename exists"
+        else
+                echo "KO long filename is absent "
+        fi
+fi
+
+
+#==========================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM 254 folder name"
+TESTFILE="$PREFIX/test${TESTNUM}"
+
+I=0
+L=254
+LNAME=""
+
+
+while [ $I -lt $L ]
+do
+        I=$(( $I + 1 ))
+        LNAME="${LNAME}a"
+done
+
+
+
+if testit
+then
+        mkdir "$TESTFILE"
+        mkdir "$TESTFILE/$LNAME"
+else
+
+        if [ -d "$TESTFILE/$LNAME" ]
+        then
+                echo "OK long folder exists"
+        else
+                echo "KO long folder is absent "
+        fi
+fi
+
+#==========================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM  254 char filename in 254 folder name"
+TESTFILE="$PREFIX/test${TESTNUM}"
+
+I=0
+L=254
+LNAME=""
+while [ $I -lt $L ]
+do
+        I=$(( $I + 1 ))
+        LNAME="${LNAME}a"
+done
+
+
+
+if testit
+then
+        mkdir "$TESTFILE"
+        mkdir "$TESTFILE/$LNAME"
+        > "$TESTFILE/$LNAME/$LNAME"
+else
+
+        if [ -f "$TESTFILE/$LNAME/$LNAME" ]
+        then
+                echo "OK long filename exists"
+        else
+                echo "KO long filename is absent "
+        fi
+fi
+
+
+
+
+
