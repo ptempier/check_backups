@@ -411,7 +411,7 @@ fi
 
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
-echo -e "\ntest $TESTNUM  file permissions"
+echo -e "\ntest $TESTNUM  file permissions 444"
 TESTFILE="$PREFIX/test$TESTNUM"
 PERM="444"
 PERMB="-r--r--r--"
@@ -431,7 +431,7 @@ fi
 
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
-echo -e "\ntest $TESTNUM  folder permissions"
+echo -e "\ntest $TESTNUM  folder permissions 444"
 TESTFILE="$PREFIX/test$TESTNUM"
 PERM="444"
 PERMB="dr--r--r--"
@@ -449,10 +449,9 @@ else
         fi
 fi
 
-
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
-echo -e "\ntest $TESTNUM file  permissions"
+echo -e "\ntest $TESTNUM file  permissions 2666"
 TESTFILE="$PREFIX/test$TESTNUM"
 PERM="2666"
 PERMB="-rw-rwSrw-"
@@ -470,16 +469,56 @@ else
         fi
 fi
 
-
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
-echo -e "\ntest $TESTNUM folder  permissions"
+echo -e "\ntest $TESTNUM folder  permissions 2666"
 TESTFILE="$PREFIX/test$TESTNUM"
 PERM="2666"
 PERMB="drw-rwSrw-"
 if testit
 then
         mkdir "$TESTFILE"
+        chmod "$PERM" "$TESTFILE"
+else
+        PERMC="$(stat -c %A "$TESTFILE")"
+        if [[ "$PERMB" = "$PERMC" ]]
+        then
+                echo "OK permissions is good : $PERMB"
+        else
+                echo "KO permission is bad $PERMB != $PERMC"
+        fi
+fi
+
+#=======================================
+
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM file  permissions u+s"
+TESTFILE="$PREFIX/test$TESTNUM"
+PERM="4644"
+PERMB="-rwSr--r--"
+if testit
+then
+        > "$TESTFILE"
+        chmod "$PERM" "$TESTFILE"
+else
+        PERMC="$(stat -c %A "$TESTFILE")"
+        if [[ "$PERMB" = "$PERMC" ]]
+        then
+                echo "OK permissions is good : $PERMB"
+        else
+                echo "KO permission is bad $PERMB != $PERMC"
+        fi
+fi
+
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM file  permissions ug+s"
+TESTFILE="$PREFIX/test$TESTNUM"
+PERM="6644"
+PERMB="-rwSr-Sr--"
+if testit
+then
+        > "$TESTFILE"
         chmod "$PERM" "$TESTFILE"
 else
         PERMC="$(stat -c %A "$TESTFILE")"
@@ -508,7 +547,7 @@ else
         then
                 echo "OK 3 hard link"
         else
-                echo "KO $HLINK hrdlink != 3"
+                echo "KO $HLINK hardlink != 3"
         fi
 fi
 
@@ -700,7 +739,6 @@ else
         fi
 fi
 
-
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
 echo -e "\ntest $TESTNUM sparse file"
@@ -761,5 +799,57 @@ else
                 echo "OK symlink exists "
         else
                 echo "KO symlink absent"
+        fi
+fi
+
+
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM md5sum of ls -lk /bin copy"
+TESTFILE="$PREFIX/test${TESTNUM}"
+ORIG="$(ls -lk "/bin/" | md5sum -b)"
+
+if grep -q /tmp /etc/mtab
+then
+	"echo different fs, will fail because of hardlink count"
+fi
+
+if testit
+then
+        mkdir "$TESTFILE"
+        cp -ab /bin/* "$TESTFILE/"
+	ls -lk "$TESTFILE"  | md5sum -b
+else
+	DEST="$(ls -lk "$TESTFILE"| md5sum -b)"
+
+        if [ "$ORIG" == "$DEST" ]
+        then
+                echo "OK same md5 $ORIG"
+        else
+                echo "KO different md5 $DEST != $ORIG"
+        fi
+fi
+
+#=======================================
+
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM md5sum of ls -lk /bin copy , exclude hardlink count"
+TESTFILE="$PREFIX/test${TESTNUM}"
+ORIG="$(ls -lk "/bin/" | awk  '!($2="")' | md5sum -b)"
+
+
+if testit
+then
+        mkdir "$TESTFILE"
+        cp -ab /bin/* "$TESTFILE/"
+        ls -lk "$TESTFILE"| awk  '!($2="")'  | md5sum -b
+else
+        DEST="$(ls -lk "$TESTFILE"| awk  '!($2="")' | md5sum -b)"
+
+        if [ "$ORIG" == "$DEST" ]
+        then
+                echo "OK same md5 $ORIG"
+        else
+                echo "KO different md5 $DEST != $ORIG"
         fi
 fi
