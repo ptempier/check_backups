@@ -4,6 +4,10 @@ PREFIX=/tmp/filetests/
 mkdir -p "$PREFIX"
 TESTNUM="0"
 cd "$PREFIX"
+BACKUP_CMD="urbackupclientctl  start -i"
+RESTORE_CMD="urbackupclientctl restore-start -b last -d filetests"
+
+
 #======================================
 function testit {
 	if	[ "$MODE" = "READ" ]
@@ -41,13 +45,13 @@ then
 elif    [ "$1" = "BACKUP" ]
 then
         echo "backuping $PREFIX"
-	urbackupclientctl  start -i
+	$BACKUP_CMD
         exit 0
 
 elif    [ "$1" = "RESTORE" ]
 then
 	echo "restoring $PREFIX"
-	urbackupclientctl restore-start -b last -d filetests
+	$RESTORE_CMD
 	exit 0
 else
 	echo "unsupported, exiting"
@@ -191,6 +195,45 @@ else
                 echo "OK same grp id : $GRP"
         fi
 fi
+
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM symlink permissions"
+TESTFILE="$PREFIX/test$TESTNUM"
+
+#       NUMUSER="(wc -l /etc/passwd)"
+#       RAND="$(( ( RANDOM % $NUMUSER )  + 1 ))"
+#       USR="$(sed "${$RAND}q;d" /etc/passwd | awk '{print $1}')"
+USR="$(sed "10q;d" /etc/passwd | cut -d ':' -f 1)"
+GRP="$(sed "11q;d" /etc/group  | cut -d ':' -f 1 )"
+
+if testit
+then
+        >"$TESTFILE"
+	ln -s "$TESTFILE" "${TESTFILE}_slink"
+        	chown -h "$USR:$GRP" "${TESTFILE}_slink"
+                echo "created $TESTFILE"
+else
+        USRB="$(ls -ld "${TESTFILE}_slink" | awk '{print $3}')"
+        if [ "$USR" != "$USRB" ]
+        then
+                echo "KO user id is different exptected $USR got  $USRB"
+        else
+                echo "OK same user id $USR"
+        fi
+
+        GRPB="$(ls -ld "${TESTFILE}_slink" | awk '{print $4}')"
+        if [ "$GRP" != "$GRPB" ]
+        then
+                echo "KO group id is different expected $GRP got $GRPB"
+        else
+                echo "OK same grp id : $GRP"
+        fi
+fi
+
+
+
+
 
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
@@ -988,7 +1031,20 @@ else
         fi
 fi
 
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM fifo"
+TESTFILE="$PREFIX/test$TESTNUM"
 
-
-
-
+if testit
+then
+        mkfifo "$TESTFILE"
+else
+        TYPE="$(ls -ld "$TESTFILE" | cut -c1)"
+        if [ "$TYPE" == "p" ]
+        then
+                echo "OK , fifo ,$TYPE"
+        else
+                echo "KO  not a fifo $TYPE"
+        fi
+fi
