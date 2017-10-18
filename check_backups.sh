@@ -849,8 +849,64 @@ else
 fi
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
-echo -e "\ntest $TESTNUM file special filename"
+echo -e "\ntest $TESTNUM file special filename : _éèçàùù=+-ç-()61aze¨£€#,x az~"
+#test31_éèçàùù=+-ç-()61aze¨£€#,x az~
 SPEC="$(printf "\xc3\xa9\xc3\xa8\xc3\xa7\xc3\xa0\xc3\xb9\xc3\xb9\x3d\x2b\x2d\xc3\xa7\x2d\x28\x29\x36\x31\x61\x7a\x65\xc2\xa8\xc2\xa3\xe2\x82\xac\x23\x2c\x78\x20\x61\x7a\x7e")"
+TESTFILE="$PREFIX/test${TESTNUM}_${SPEC}"
+
+if testit
+then
+        > "$TESTFILE"
+else
+        if [ -e  "$TESTFILE" ]
+        then
+                echo "OK file exists $TESTFILE"
+        else
+                echo "KO file absent $TESTFILE"
+        fi
+fi
+
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM file special filename :     :*?"
+SPEC="$(printf "\x3f\x0a\x2a\x0a\x3a\x0a")"
+TESTFILE="$PREFIX/test${TESTNUM}_${SPEC}"
+
+if testit
+then
+        > "$TESTFILE"
+else
+        if [ -e  "$TESTFILE" ]
+        then
+                echo "OK file exists $TESTFILE"
+        else
+                echo "KO file absent $TESTFILE"
+        fi
+fi
+
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM file special filename :  '^&"'@{}[]$!%'
+SPEC="$(printf "\x27\x5e\x26\x40\x7b\x7d\x5b\x5d\x24\x21\x25\x0a")"
+TESTFILE="$PREFIX/test${TESTNUM}_${SPEC}"
+
+if testit
+then
+        > "$TESTFILE"
+else
+        if [ -e  "$TESTFILE" ]
+        then
+                echo "OK file exists $TESTFILE"
+        else
+                echo "KO file absent $TESTFILE"
+        fi
+fi
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM file newline in filename"
+SPEC="aaaa
+bbb
+ccccc"
 TESTFILE="$PREFIX/test${TESTNUM}_${SPEC}"
 
 if testit
@@ -1303,3 +1359,4 @@ else
                 echo "OK  good ownership"
         fi
 fi
+
