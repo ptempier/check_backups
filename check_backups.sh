@@ -160,8 +160,6 @@ else
         fi
 fi
 
-
-
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
 echo -e "\ntest $TESTNUM file,  10th  user, 11th group"
@@ -269,8 +267,6 @@ else
         fi
 fi
 
-
-
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
 echo -e "\ntest $TESTNUM folder, random user"
@@ -331,9 +327,6 @@ else
                 echo "OK same grp id : $GRP"
         fi
 fi
-
-
-
 
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
@@ -408,7 +401,6 @@ else
                 echo "OK same grp id : $GRPB "
         fi
 fi
-
 
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
@@ -573,7 +565,6 @@ else
 fi
 
 #=======================================
-
 TESTNUM="$(( $TESTNUM + 1))"
 echo -e "\ntest $TESTNUM file  permissions u+s"
 TESTFILE="$PREFIX/test$TESTNUM"
@@ -612,7 +603,6 @@ else
                 echo "KO permission is bad $PERMB != $PERMC"
         fi
 fi
-
 
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
@@ -709,7 +699,6 @@ else
         fi
 fi
 
-
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
 echo -e "\ntest $TESTNUM character device"
@@ -720,6 +709,77 @@ TYPE="c"
 if testit
 then
 	mknod "$TESTFILE" "$TYPE" "$MAJ" "$MIN"
+else
+        TYPEB="$(ls -ld "$TESTFILE"| cut -c 1)"
+        if [[ "$TYPE" = "$TYPEB" ]]
+        then
+                echo "OK type is good : $TYPE"
+        else
+                echo "KO type is bad $TYPE != $TYPEB"
+        fi
+
+        MAJB="$(stat -c %t "$TESTFILE")"
+        if [[ "$MAJB" = "$MAJ" ]]
+        then
+                echo "OK major : $MAJB"
+        else
+                echo "KO major $MAJB != $MAJ"
+        fi
+
+        MINB="$(stat -c %T "$TESTFILE")"
+        if [[ "$MINB" = "$MIN" ]]
+        then
+                echo "OK minor : $MINB"
+        else
+                echo "KO minor $MINB != $MIN"
+        fi
+fi
+
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM character device"
+TESTFILE="$PREFIX/test$TESTNUM"
+MAJ="3"
+MIN="3"
+TYPE="c"
+if testit
+then
+        mknod "$TESTFILE" "$TYPE" "$MAJ" "$MIN"
+else
+        TYPEB="$(ls -ld "$TESTFILE"| cut -c 1)"
+        if [[ "$TYPE" = "$TYPEB" ]]
+        then
+                echo "OK type is good : $TYPE"
+        else
+                echo "KO type is bad $TYPE != $TYPEB"
+        fi
+
+        MAJB="$(stat -c %t "$TESTFILE")"
+        if [[ "$MAJB" = "$MAJ" ]]
+        then
+                echo "OK major : $MAJB"
+        else
+                echo "KO major $MAJB != $MAJ"
+        fi
+
+        MINB="$(stat -c %T "$TESTFILE")"
+        if [[ "$MINB" = "$MIN" ]]
+        then
+                echo "OK minor : $MINB"
+        else
+                echo "KO minor $MINB != $MIN"
+        fi
+fi
+#=======================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM character device"
+TESTFILE="$PREFIX/test$TESTNUM"
+MAJ="1"
+MIN="0"
+TYPE="b"
+if testit
+then
+        mknod "$TESTFILE" "$TYPE" "$MAJ" "$MIN"
 else
         TYPEB="$(ls -ld "$TESTFILE"| cut -c 1)"
         if [[ "$TYPE" = "$TYPEB" ]]
@@ -885,12 +945,11 @@ else
         fi
 fi
 
-
 #=======================================
 TESTNUM="$(( $TESTNUM + 1))"
 echo -e "\ntest $TESTNUM md5sum of ls -lk /bin copy"
 TESTFILE="$PREFIX/test${TESTNUM}"
-ORIG="$(ls -lk "/bin/" | md5sum -b)"
+ORIG="$(ls -lk "/bin/" | tail -n +2 | md5sum -b)"
 
 if grep -q /tmp /etc/mtab
 then
@@ -901,9 +960,9 @@ if testit
 then
         mkdir "$TESTFILE"
         cp -ab /bin/* "$TESTFILE/"
-	ls -lk "$TESTFILE"  | md5sum -b
+	ls -lk "$TESTFILE" | tail -n +2 | md5sum -b
 else
-	DEST="$(ls -lk "$TESTFILE"| md5sum -b)"
+	DEST="$(ls -lk "$TESTFILE" | tail -n +2| md5sum -b)"
 
         if [ "$ORIG" == "$DEST" ]
         then
@@ -918,16 +977,16 @@ fi
 TESTNUM="$(( $TESTNUM + 1))"
 echo -e "\ntest $TESTNUM md5sum of ls -lk /bin copy , exclude hardlink count"
 TESTFILE="$PREFIX/test${TESTNUM}"
-ORIG="$(ls -lk "/bin/" | awk  '!($2="")' | md5sum -b)"
+ORIG="$(ls -lk "/bin/" | awk  '!($2="")' | tail -n +2 | md5sum -b)"
 
 
 if testit
 then
         mkdir "$TESTFILE"
         cp -ab /bin/* "$TESTFILE/"
-        ls -lk "$TESTFILE"| awk  '!($2="")'  | md5sum -b
+        ls -lk "$TESTFILE"| awk  '!($2="")'  | tail -n +2|  md5sum -b
 else
-        DEST="$(ls -lk "$TESTFILE"| awk  '!($2="")' | md5sum -b)"
+        DEST="$(ls -lk "$TESTFILE"| tail -n +2| awk  '!($2="")' | md5sum -b)"
 
         if [ "$ORIG" == "$DEST" ]
         then
@@ -966,7 +1025,6 @@ else
                 echo "KO long filename is absent "
         fi
 fi
-
 
 #==========================================
 TESTNUM="$(( $TESTNUM + 1))"
@@ -1046,5 +1104,202 @@ else
                 echo "OK , fifo ,$TYPE"
         else
                 echo "KO  not a fifo $TYPE"
+        fi
+fi
+#==========================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM 2048 files in folder"
+
+TESTFILE="$PREFIX/test${TESTNUM}"
+
+I=0
+L=2048
+
+if testit
+then
+	mkdir "$TESTFILE"
+	while [ $I -lt $L ]
+	do
+	        I=$(( $I + 1 ))
+        	>  "$TESTFILE/$I"
+	done
+else
+	FAIL=0
+        while [ $I -lt $L ]
+        do
+                I=$(( $I + 1 ))
+
+        	if [ ! -f "$TESTFILE/$I" ]
+	        then
+			FAIL=1
+	        fi
+        done
+
+        if [ "$FAIL" -eq 1 ]
+        then
+                echo "KO missing file"
+        else
+                echo "OK all files present"
+        fi
+fi
+
+#==========================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM 2048 folders in folder"
+
+TESTFILE="$PREFIX/test${TESTNUM}"
+
+I=0
+L=2048
+
+if testit
+then
+	mkdir "$TESTFILE"
+        while [ $I -lt $L ]
+        do
+                I=$(( $I + 1 ))
+                mkdir  "$TESTFILE/$I"
+        done
+else
+        FAIL=0
+        while [ $I -lt $L ]
+        do
+                I=$(( $I + 1 ))
+
+                if [ ! -d "$TESTFILE/$I" ]
+                then
+                        FAIL=1
+                fi
+        done
+
+        if [ "$FAIL" -eq 1 ]
+        then
+                echo "KO missing folder"
+        else
+                echo "OK all folders"
+        fi
+fi
+
+#==========================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM 100 subfolders levels"
+
+TESTFILE="$PREFIX/test${TESTNUM}"
+FNAME="$TESTFILE/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a"
+
+
+if testit
+then
+	mkdir -p "$FNAME"
+else
+        if [ ! -d "$FNAME" ]
+        then
+                echo "KO missing folder"
+        else
+                echo "OK all folders"
+        fi
+fi
+
+
+#==========================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM 1 file per user in passwd"
+
+TESTFILE="$PREFIX/test${TESTNUM}"
+USRS="$(cat /etc/passwd| cut -d ':' -f 1)"
+if testit
+then
+        mkdir -p "$TESTFILE"
+
+	for USR in $USRS
+	do
+		> "$TESTFILE/$USR"
+		chown "$USR" "$TESTFILE/$USR"
+	done
+else
+	FAIL=0
+        for USR in $USRS
+        do
+		TUSR="$(ls -ld  "$TESTFILE/$USR" | awk '{print $3}' )"
+                if [ "$TUSR" != "$USR" ]
+		then
+			FAIL=1
+		fi
+
+                if [ ! -f  "$TESTFILE/$USR" ]
+                then
+                        FAIL=1
+                fi
+
+        done
+
+        if [ "$FAIL" -eq 1 ]
+        then
+                echo "KO bad ownership"
+        else
+                echo "OK  good ownership"
+        fi
+fi
+
+#==========================================
+TESTNUM="$(( $TESTNUM + 1))"
+echo -e "\ntest $TESTNUM 1 file per user in passwd in one folder per user"
+
+TESTFILE="$PREFIX/test${TESTNUM}"
+USRS="$(cat /etc/passwd| cut -d ':' -f 1)"
+if testit
+then
+        mkdir -p "$TESTFILE"
+
+	for DUSR in $USRS
+	do
+		mkdir "$TESTFILE/$DUSR"
+		chown "$DUSR" "$TESTFILE/$DUSR"
+
+	        for FUSR in $USRS
+	        do
+	                > "$TESTFILE/$DUSR/$FUSR"
+	                chown "$FUSR" "$TESTFILE/$DUSR/$FUSR"
+	        done
+	done
+else
+        FAIL=0
+
+        for DUSR in $USRS
+        do
+                TUSR="$(ls -ld  "$TESTFILE/$DUSR/" | awk '{print $3}' )"
+                if [ "$TUSR" != "$DUSR" ]
+                then
+                #               echo "$TUSR  != $FUSR"
+                        FAIL=1
+                fi
+
+                if [ ! -d  "$TESTFILE/$DUSR" ]
+                then
+                        FAIL=1
+                fi
+
+	        for FUSR in $USRS
+	        do
+	                TUSR="$(ls -ld  "$TESTFILE/$DUSR/$FUSR" | awk '{print $3}' )"
+	                if [ "$TUSR" != "$FUSR" ]
+	                then
+		#		echo "$TUSR  != $FUSR"
+	                        FAIL=1
+	                fi
+
+	                if [ ! -f  "$TESTFILE/$DUSR/$FUSR" ]
+	                then
+		#		echo "miss $TESTFILE/$DUSR/$FUSR"
+	                        FAIL=1
+	                fi
+		done
+        done
+
+        if [ "$FAIL" -eq 1 ]
+        then
+                echo "KO bad ownership"
+        else
+                echo "OK  good ownership"
         fi
 fi
