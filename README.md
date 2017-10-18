@@ -1,20 +1,21 @@
 # check_backups
 
-#run this to create test files <br />
+#run this to create test files<br />
 check_backups.sh WRITE
 
 #make a backup
+check_backups.sh BACKUP
 
-#list created file <br />
+#list created file<br />
 check_backups.sh LIST
 
-#delete the test files in /tmp/filetests/ <br />
+#delete the test files in /tmp/filetests/<br />
 check_backups.sh DELETE
 
-#restore files (build in command for urbackup) <br />
+#restore files <br />
 check_backups.sh RESTORE
 
-#list restored file <br /> <br />
+#list restored file <br />
 check_backups.sh LIST
 
 #run this to check for differences <br />
