@@ -41,6 +41,7 @@ function setup_testenv {
 	elif    [ "$1" = "DELETE" ]
 	then
 		echo "deleting $PREFIX"
+		chattr -i "$PREFIX/"* 2>/dev/null
 		rm -rf "$PREFIX"
 		exit 0
 	elif    [ "$1" = "BACKUP" ]
@@ -495,6 +496,62 @@ echo -e "\n#===== test_acl	==================================="
 		        echo "OK same grp id : $GRPB "
 		fi
 	fi
+}
+
+
+function test_chattrs {
+	echo -e "\n#===== test_chattr =================================="
+        TESTNUM="$(( $TESTNUM + 1))"
+        echo "test $TESTNUM file chattrs"
+        TESTFILE="$PREFIX/test$TESTNUM"
+	ATTR="-i-----j-t-e----"
+
+	#i immutable
+	#j journal writes
+	#S sync files
+	#t disable tail merging
+
+        if testit
+        then
+                chattr -i "$TESTFILE" 2> /dev/null
+                > "$TESTFILE"
+                echo "created $TESTFILE"
+		chattr +ijSt "$TESTFILE"
+	else
+                RES="$( lsattr  "$TESTFILE")"
+		if [ "$ATTR" = "$RES" ]
+                then
+                        echo "KO attr is different $ATTR != $RES"
+                else
+                        echo "OK same attr : $ATTR "
+                fi
+        fi
+
+        #=======================================
+        TESTNUM="$(( $TESTNUM + 1))"
+        echo "test $TESTNUM folder chattrs"
+        TESTFILE="$PREFIX/test$TESTNUM"
+	ATTR="---D--d------Te---P"
+
+	#d disable dump
+	#P project hierarchy
+	#D sync folders #folder only
+	#T top level for block alocator
+
+        if testit
+        then
+                mkdir "$TESTFILE"
+                echo "created $TESTFILE"
+                chattr +dPDT "$TESTFILE"
+        else
+		RES="$( lsattr -d "$TESTFILE")"
+                if [ "$ATTR" = "$RES" ]
+                then
+                        echo "KO attr is different $ATTR != $RES"
+                else
+                        echo "OK same attr : $ATTR "
+                fi
+        fi
 }
 
 function test_dates {
@@ -1456,6 +1513,7 @@ echo -e "\n#====== test_sparsefile	============================="
 setup_testenv "$1"
 test_users
 test_permissions
+test_chattrs
 test_acl
 test_dates
 test_links
