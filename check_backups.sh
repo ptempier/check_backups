@@ -1096,7 +1096,7 @@ echo -e "\n#===== test_bincopy	==========================="
 
 	if grep -q /tmp /etc/mtab
 	then
-		"echo different fs, will fail because of hardlink count"
+		echo "different fs, will fail because of hardlink count"
 	fi
 
 	if testit
